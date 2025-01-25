@@ -1,0 +1,5 @@
+flask
+Werkzeug
+Flask-Mail
+schedule
+python-dotenv

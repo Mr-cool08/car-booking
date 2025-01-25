@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+{% endblock %}
+
+{% block title %}Sätes bokning{% endblock %}
+{% block content %}
+<center>
+<h1>Välkommen till sätes bokning</h1>
+<p>Boka säte i Timothys bil snabbt.</p></center>
+
+<form id="bookingForm">
+    <center>
+    <input type="text" id="name" name="name" placeholder="Ditt namn" class="input-field" required>
+    <input type="email" id="email" name="email" placeholder="Din E-postaddress" class="input-field" required></center>
+    <div class="car">
+        <div class="row">
+            <div class="seat booked" data-seat-id="1"></div>
+            <div class="seat {% if seats['2'] == 'booked' %}booked{% elif seats['2'] == 'pending' %}pending{% endif %}" data-seat-id="2"></div>
+        </div>
+        <div class="row">
+            <div class="seat {% if seats['3'] == 'booked' %}booked{% elif seats['3'] == 'pending' %}pending{% endif %}" data-seat-id="3"></div>
+            <div class="seat {% if seats['4'] == 'booked' %}booked{% elif seats['4'] == 'pending' %}pending{% endif %}" data-seat-id="4"></div>
+            <div class="seat {% if seats['5'] == 'booked' %}booked{% elif seats['5'] == 'pending' %}pending{% endif %}" data-seat-id="5"></div>
+        </div>
+    </div>
+    <center><button type="button" id="confirmButton" class="confirm-button">Bekräfta bokning</button></center>
+</form>
+
+<script>
+document.querySelectorAll('.seat').forEach(seat => {
+    seat.addEventListener('click', function() {
+        if (this.classList.contains('booked')) return;
+        this.classList.toggle('selected');
+        const selectedSeats = document.querySelectorAll('.seat.selected');
+        if (selectedSeats.length > 2) {
+            this.classList.remove('selected');
+            alert('Du kan bara välja upp till två platser.');
+        }
+    });
+});
+
+document.getElementById('confirmButton').addEventListener('click', function() {
+    const selectedSeats = document.querySelectorAll('.seat.selected');
+    if (selectedSeats.length === 0) {
+        alert('Var god välj minst ett säte.');
+        return;
+    }
+    const seatIds = Array.from(selectedSeats).map(seat => seat.getAttribute('data-seat-id'));
+    const name = document.getElementById('name').value;
+    const email = document.getElementById('email').value;
+    fetch('/book_seat', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: `seat_ids=${seatIds.join(',')}&name=${name}&email=${email}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            selectedSeats.forEach(seat => {
+                seat.classList.add('pending');
+                seat.classList.remove('selected');
+            });
+            alert('Din bokning har skickats och väntar på godkännande.');
+        } else {
+            alert(data.message);
+        }
+    });
+});
+</script>
+
+{% endblock %}

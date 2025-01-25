@@ -1,0 +1,71 @@
+.car {
+    width: 300px;
+    height: 150px;
+    background-color: #333;
+    border-radius: 15px;
+    position: relative;
+    margin: 20px auto;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+.seat {
+    width: 40px;
+    height: 40px;
+    background-color: #4CAF50;
+    border-radius: 5px;
+    display: inline-block;
+    margin: 5px;
+    cursor: pointer;
+}
+
+.seat.booked {
+    background-color: #FF0000;
+}
+
+.seat.pending {
+    background-color: #FFA500;
+}
+
+.seat.selected {
+    background-color: #FFD700;
+}
+
+.seat:hover {
+    background-color: #45a049;
+}
+
+.car .row {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 0;
+}
+
+.input-field {
+    width: 80%;
+    padding: 10px;
+    margin: 10px 0;
+    box-sizing: border-box;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.input-field:focus {
+    border-color: #4CAF50;
+    outline: none;
+}
+
+.confirm-button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.confirm-button:hover {
+    background-color: #45a049;
+}

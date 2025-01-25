@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+{% endblock %}
+
+{% block title %}Admin Panel{% endblock %}
+{% block content %}
+
+<h1>Admin Panel</h1>
+<div class="table-container">
+    <table>
+        <tr>
+            <th>Sätes ID</th>
+            <th>Namn</th>
+            <th>Email</th>
+            <th>Status</th>
+            <th>Åtgärd</th>
+        </tr>
+        {% for booking in bookings %}
+        <tr>
+            <td data-label="Sätes ID">{{ booking[1] }}</td>
+            <td data-label="Namn">{{ booking[2] }}</td>
+            <td data-label="Email">{{ booking[3] }}</td>
+            <td data-label="Status">{{ 'Godkänd' if booking[4] else 'Väntande' }}</td>
+            <td data-label="Åtgärd">
+                <form method="POST">
+                    <input type="hidden" name="booking_id" value="{{ booking[0] }}">
+                    <button type="submit" name="action" value="approve">Godkänd</button>
+                    <button type="submit" name="action" value="reject">Neka</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+{% endblock %}
+
