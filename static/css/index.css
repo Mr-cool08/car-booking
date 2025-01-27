@@ -1,3 +1,15 @@
+body{
+    background-color: #121212;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    color: #fff;
+}
+
+.text-center{
+    text-align: center;
+}
+
 .car {
     width: 300px;
     height: 150px;
@@ -7,6 +19,7 @@
     margin: 20px auto;
     padding: 10px;
     box-sizing: border-box;
+    box-shadow: 0 2px 5px rgba(255, 255, 255, 0.185);
 }
 
 .seat {
@@ -17,23 +30,32 @@
     display: inline-block;
     margin: 5px;
     cursor: pointer;
+    box-shadow: 0 1px 3px #4CAF50;
 }
 
 .seat.booked {
     background-color: #FF0000;
+    box-shadow: 0 1px 3px #FF0000;
+    pointer-events: none;
 }
 
 .seat.pending {
-    background-color: #FFA500;
+    background-color: #ffa600;
+    box-shadow: 0 1px 1.5px #FFA500;
 }
 
 .seat.selected {
-    background-color: #FFD700;
+    background-color: #00ffaa;
+    box-shadow: 0 1px 3px #00ffaa;
+    
 }
 
 .seat:hover {
-    background-color: #45a049;
+    opacity: 0.5;
+    transition: opacity .3s ease;
 }
+
+
 
 .car .row {
     display: flex;
@@ -52,8 +74,9 @@
 }
 
 .input-field:focus {
-    border-color: #4CAF50;
+    border-color: #000000;
     outline: none;
+    box-shadow: 0 1px 3px #000000;
 }
 
 .confirm-button {
@@ -68,4 +91,17 @@
 
 .confirm-button:hover {
     background-color: #45a049;
+}
+
+.container {
+    color: #fff;
+    text-align: center;
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #424242;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    padding-bottom: 40px;
+    margin-bottom: 20px;
 }

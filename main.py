@@ -41,7 +41,15 @@ MAIL_USERNAME = os.getenv('MAIL_USERNAME')
 MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
 
 app.secret_key = SECRET_KEY
-
+def checkiftaken(seat_id):
+    with sqlite3.connect('bookings.db') as conn:
+        cursor = conn.cursor()
+        cursor.execute('SELECT seat_id FROM bookings WHERE seat_id = ?', (seat_id,))
+        booking = cursor.fetchone()
+        if booking:
+            return True
+        else:
+            return False
 def init_db():
     with sqlite3.connect('bookings.db') as conn:
         cursor = conn.cursor()
@@ -54,8 +62,11 @@ def init_db():
                 approved BOOLEAN DEFAULT 0
             )
         ''')
-        cursor.execute('INSERT OR IGNORE INTO bookings (seat_id, name, email, approved) VALUES ("1", "Timothy", "Timothy@timothy.timothy", 1)')
-        conn.commit()
+        if checkiftaken("1") == False:
+            cursor.execute('INSERT OR IGNORE INTO bookings (seat_id, name, email, approved) VALUES ("1", "Timothy", "Timothy@timothy.timothy", 1)')
+            conn.commit()
+        else: 
+            pass
 
 def send_email(subject, recipient, html_content):
     msg = MIMEMultipart()
@@ -110,6 +121,8 @@ def admin():
             booking = cursor.fetchone()
             if booking:
                 if action == 'approve':
+                    if checkiftaken(booking[1]) == True:
+                        return render_template('error.html', error_name="Säte upptagen")
                     cursor.execute('UPDATE bookings SET approved = 1 WHERE id = ?', (booking_id,))
                     conn.commit()
                     send_email(
@@ -170,4 +183,4 @@ if __name__ == '__main__':
         pass
     init_db()
     threading.Thread(target=schedule_restart).start()
-    app.run(debug=False, host="0.0.0.0", port=80)
+    app.run(debug=True, host="0.0.0.0", port=80)

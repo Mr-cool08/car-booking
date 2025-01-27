@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}
+    ERROR!
+{% endblock title %}
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/error.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+{% endblock head %}  
+
+{% block content %}
+
+<div class="container">
+    <h1>Fel{% if error_name %}: {{ error_name }}{% endif %}</h1>
+    <p><strong>{{ message }}</strong></p>
+    Vi är mycket ledsna att du hamnade på den här sidan.<p>
+        
+    <p></p>
+    <a class="back-button" onclick="history.back()">Gå Tillbaka</a>
+</div>
+
+
+{% endblock content %}  
