@@ -185,4 +185,4 @@ if __name__ == '__main__':
         pass
     init_db()
     threading.Thread(target=schedule_restart).start()
-    app.run(debug=True, host="0.0.0.0", port=80)
+    app.run(debug=False, host="0.0.0.0", port=80)
