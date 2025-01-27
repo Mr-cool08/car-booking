@@ -1,10 +1,19 @@
+body{
+    background-color: #121212;
+    font-family: Arial, sans-serif;
+
+
+    color: #fff;
+}
+
 .container {
     max-width: 400px;
     margin: 0 auto;
     padding: 20px;
-    background-color: #fff;
+    background-color: #333;
     border-radius: 5px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin-top: 50px;
 }
 
 h1 {

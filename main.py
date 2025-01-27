@@ -122,7 +122,7 @@ def admin():
             if booking:
                 if action == 'approve':
                     if checkiftaken(booking[1]) == True:
-                        return render_template('error.html', error_name="Säte upptagen")
+                        return render_template('error.html', error_name="Sätet är redan bokat")
                     cursor.execute('UPDATE bookings SET approved = 1 WHERE id = ?', (booking_id,))
                     conn.commit()
                     send_email(
