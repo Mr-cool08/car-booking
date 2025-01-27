@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/cheat.css') }}">
+{% endblock %}
+
+{% block title %}Admin Fusklapp{% endblock %}
+{% block content %}
+<div class="menu">
+<ul>
+    <li><a href="{{ url_for('home') }}">Hem</a></li>
+    <li><a href="{{ url_for('cheat') }}">Fusklapp</a></li>
+    <li><a href="{{ url_for('admin') }}">Admin</a></li>
+  </ul>
+</div>
+<h1 class="center-text">Admin Fusklapp</h1>
+<div class="cheatsheet-container">
+    <h2>Sidor:</h2>
+    <ul>
+        <li><strong>Hem:</strong> Navigera till hemsidan.</li>
+        <li><strong>Fusklapp:</strong> Visa denna fusklapp.</li>
+        <li><strong>Admin:</strong> Gå till adminpanelen för att hantera bokningar.</li>
+    </ul>
+    <h2>Admin panel:</h2>
+    <ul>
+        <li><strong>Godkänn Bokning:</strong> Klicka på "Godkänd" knappen för att godkänna en bokning.</li>
+        <li><strong>Neka Bokning:</strong> Klicka på "Neka" knappen för att neka en bokning.</li>
+        <h3><li><strong>Bokningsstatus:</strong> </h3>
+            <ul>
+                <li><strong>Godkänd:</strong> Bokningen är godkänd.</li>
+                <li><strong>Väntande:</strong> Bokningen väntar på godkännande.</li>
+            </ul>
+        </li>
+    </ul>
+    <h2>E-post:</h2>
+    <ul>
+        <li><strong>Godkännande E-post:</strong> Ett e-postmeddelande skickas till användaren när en bokning är godkänd.</li>
+        <li><strong>Nekande E-post:</strong> Ett e-postmeddelande skickas till användaren när en bokning är nekad.</li>
+    </ul>
+    <h2>Sätes ID:</h2>
+    <div class="image-container">
+        <img src="{{ url_for('static', filename='images/imgc60558a301305774c0a801525042fbe8_2_--_--_VOICEpnghigh.avif') }}" alt="Cheatsheet Image">
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const image = document.querySelector('.image-container img');
+            image.addEventListener('click', function() {
+                image.classList.toggle('enlarged');
+            });
+        });
+    </script>
+</div>
+
+{% endblock %}

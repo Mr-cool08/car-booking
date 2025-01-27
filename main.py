@@ -171,7 +171,9 @@ def schedule_restart():
     while True:
         schedule.run_pending()
         time.sleep(1)
-
+@app.route('/cheat', methods=['GET'])
+def cheat():
+    return render_template('cheat.html')
 if __name__ == '__main__':
     if weeknumbercheck() == False:
         with sqlite3.connect('bookings.db') as conn:

@@ -1,3 +1,29 @@
+ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #333;
+  }
+  
+  li {
+    float: left;
+  }
+  
+  li a {
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+  }
+  
+  li a:hover {
+    background-color: #111;
+  }
+
+
+
 .center-text {
     text-align: center;
 }
@@ -53,6 +79,15 @@ button[name="action"][value="approve"] {
 button[name="action"][value="reject"] {
     background-color: #FF0000;
 
+}
+button[name="action"][value="reject"]:hover {
+    cursor: pointer;
+    background-color: #cc0000;
+}
+
+button[name="action"][value="approve"]:hover {
+    cursor: pointer;
+    background-color: #3e8e41;
 }
 
 @media screen and (max-width: 600px) {
