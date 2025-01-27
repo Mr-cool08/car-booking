@@ -17,7 +17,7 @@
         <tr>
             <th>Sätes ID</th>
             <th>Namn</th>
-            <th>Email</th>
+
             <th>Status</th>
             <th>Åtgärd</th>
         </tr>
@@ -25,7 +25,7 @@
         <tr>
             <td data-label="Sätes ID">{{ booking[1] }}</td>
             <td data-label="Namn">{{ booking[2] }}</td>
-            <td data-label="Email">{{ booking[3] }}</td>
+
             <td data-label="Status">{{ 'Godkänd' if booking[4] else 'Väntande' }}</td>
             <td data-label="Åtgärd">
                 <form method="POST">
