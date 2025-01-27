@@ -105,3 +105,18 @@ body{
     padding-bottom: 40px;
     margin-bottom: 20px;
 }
+.booked {
+    text-align: left;
+    color: #FF0000;
+    font-size: 12px;
+}
+.pending {
+    text-align: left;
+    color: #ffa600;
+    font-size: 12px;
+}
+.vacant {
+    text-align: left;
+    color: #4CAF50;
+    font-size: 12px;
+}
