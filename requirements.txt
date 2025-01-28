@@ -3,3 +3,4 @@ Werkzeug
 Flask-Mail
 schedule
 python-dotenv
+sqlitecloud

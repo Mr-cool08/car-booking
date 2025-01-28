@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify, render_template, session, redirect, url_for
 import os
-import sqlite3
+import sqlitecloud
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -39,10 +39,11 @@ MAIL_PORT = int(os.getenv('MAIL_PORT'))
 MAIL_USE_TLS = os.getenv('MAIL_USE_TLS') == 'True'
 MAIL_USERNAME = os.getenv('MAIL_USERNAME')
 MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
+DATABASE_LOGIN = os.getenv('DATABASE_LOGIN')
 
 app.secret_key = SECRET_KEY
 def checkiftaken(seat_id):
-    with sqlite3.connect('bookings.db') as conn:
+
         cursor = conn.cursor()
         cursor.execute('SELECT approved FROM bookings WHERE seat_id = ? AND approved = 1', (seat_id,))
         booking = cursor.fetchone()
@@ -51,7 +52,7 @@ def checkiftaken(seat_id):
         else:
             return False
 def init_db():
-    with sqlite3.connect('bookings.db') as conn:
+    
         cursor = conn.cursor()
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS bookings (
@@ -88,12 +89,12 @@ def send_email(subject, recipient, html_content):
 @app.route('/', methods=['GET', 'POST'])
 def home():
     seats = {str(i): "available" for i in range(1, 6)}
-    with sqlite3.connect('bookings.db') as conn:
-        cursor = conn.cursor()
-        cursor.execute('SELECT seat_id, approved FROM bookings')
-        bookings = cursor.fetchall()
-        for booking in bookings:
-            seats[booking[0]] = "booked" if booking[1] else "pending"
+    
+    cursor = conn.cursor()
+    cursor.execute('SELECT seat_id, approved FROM bookings')
+    bookings = cursor.fetchall()
+    for booking in bookings:
+        seats[booking[0]] = "booked" if booking[1] else "pending"
     return render_template('index.html', seats=seats)
 
 @app.route('/book_seat', methods=['POST'])
@@ -102,11 +103,11 @@ def book_seat():
     name = request.form.get('name')
     email = request.form.get('email')
     if seat_ids and name and email:
-        with sqlite3.connect('bookings.db') as conn:
-            cursor = conn.cursor()
-            for seat_id in seat_ids:
-                cursor.execute('INSERT INTO bookings (seat_id, name, email, approved) VALUES (?, ?, ?, 0)', (seat_id, name, email))
-            conn.commit()
+        
+        cursor = conn.cursor()
+        for seat_id in seat_ids:
+            cursor.execute('INSERT INTO bookings (seat_id, name, email, approved) VALUES (?, ?, ?, 0)', (seat_id, name, email))
+        conn.commit()
         return jsonify({"status": "success", "seat_ids": seat_ids})
     return jsonify({"status": "error", "message": "Invalid input"})
 
@@ -158,10 +159,10 @@ def admin():
                         </html>
                         """
                     )
-    with sqlite3.connect('bookings.db') as conn:
-        cursor = conn.cursor()
-        cursor.execute('SELECT id, seat_id, name, email, approved FROM bookings')
-        bookings = cursor.fetchall()
+    conn = sqlitecloud.connect(DATABASE_LOGIN)
+    cursor = conn.cursor()
+    cursor.execute('SELECT id, seat_id, name, email, approved FROM bookings')
+    bookings = cursor.fetchall()
     return render_template('admin.html', bookings=bookings)
 
 def restart_app():
@@ -176,11 +177,13 @@ def schedule_restart():
 def cheat():
     return render_template('cheat.html')
 if __name__ == '__main__':
+    global conn
+    conn = sqlitecloud.connect(DATABASE_LOGIN)
     if weeknumbercheck() == False:
-        with sqlite3.connect('bookings.db') as conn:
-            cursor = conn.cursor()
-            cursor.execute('DELETE FROM bookings ')
-            conn.commit()
+    
+        cursor = conn.cursor()
+        cursor.execute('DELETE FROM bookings ')
+        conn.commit()
         weeknumberwrite()
     else:
         pass
