@@ -116,49 +116,48 @@ def admin():
     if request.method == 'POST':
         booking_id = request.form.get('booking_id')
         action = request.form.get('action')
-        with sqlite3.connect('bookings.db') as conn:
-            cursor = conn.cursor()
-            cursor.execute('SELECT * FROM bookings WHERE id = ?', (booking_id,))
-            booking = cursor.fetchone()
-            if booking:
-                if action == 'approve':
-                    if checkiftaken(booking[1]) == True:
-                        print()
-                        return render_template('error.html', error_name="Sätet är redan bokat")
-                    cursor.execute('UPDATE bookings SET approved = 1 WHERE id = ?', (booking_id,))
-                    conn.commit()
-                    send_email(
-                        'Bokning godkänd',
-                        booking[3],
-                        f"""
-                        <html>
-                        <body>
-                            <p>Hej <i>{booking[2]}</i>!</p>
-                            <p>Din bokning för säte {booking[1]} har blivit godkänd.</p>
-                            <p>Var god kontakta +46 73-328 16 89 för mer information.
-                            <br><strong>Kontakta inte denna epostadress.</strong></p>
-                        </body>
-                        </html>
-                        """
-                    )
-                elif action == 'reject':
-                    cursor.execute('DELETE FROM bookings WHERE id = ?', (booking_id,))
-                    conn.commit()
-                    send_email(
-                        'Bokning avvisad',
-                        booking[3],
-                        f"""
-                        <html>
-                        <body>
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM bookings WHERE id = ?', (booking_id,))
+        booking = cursor.fetchone()
+        if booking:
+            if action == 'approve':
+                if checkiftaken(booking[1]) == True:
+                    print()
+                    return render_template('error.html', error_name="Sätet är redan bokat")
+                cursor.execute('UPDATE bookings SET approved = 1 WHERE id = ?', (booking_id,))
+                conn.commit()
+                send_email(
+                    'Bokning godkänd',
+                    booking[3],
+                    f"""
+                    <html>
+                    <body>
+                        <p>Hej <i>{booking[2]}</i>!</p>
+                        <p>Din bokning för säte {booking[1]} har blivit godkänd.</p>
+                        <p>Var god kontakta +46 73-328 16 89 för mer information.
+                        <br><strong>Kontakta inte denna epostadress.</strong></p>
+                    </body>
+                    </html>
+                    """
+                )
+            elif action == 'reject':
+                cursor.execute('DELETE FROM bookings WHERE id = ?', (booking_id,))
+                conn.commit()
+                send_email(
+                    'Bokning avvisad',
+                    booking[3],
+                    f"""
+                    <html>
+                    <body>
 
-                            <p>Hej <i>{booking[2]}</i>!</p>
-                            <p>Din bokning för säte {booking[1]} har blivit nekad.</p>
-                            <p>Var god kontakta +46 73-328 16 89 för mer information.
-                            <br><strong>Kontakta inte denna epostadress.</strong></p>
-                        </body>
-                        </html>
-                        """
-                    )
+                        <p>Hej <i>{booking[2]}</i>!</p>
+                        <p>Din bokning för säte {booking[1]} har blivit nekad.</p>
+                        <p>Var god kontakta +46 73-328 16 89 för mer information.
+                        <br><strong>Kontakta inte denna epostadress.</strong></p>
+                    </body>
+                    </html>
+                    """
+                )
     conn = sqlitecloud.connect(DATABASE_LOGIN)
     cursor = conn.cursor()
     cursor.execute('SELECT id, seat_id, name, email, approved FROM bookings')
