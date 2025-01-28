@@ -17,7 +17,7 @@
         <input type="email" id="email" name="email" placeholder="Din E-postaddress" class="input-field" required></center>
         <div class="car">
             <div class="row">
-                <div class="seat booked" data-seat-id="1"></div>
+                <div class="seat {% if seats['1'] == 'booked' %}booked{% elif seats['1'] == 'pending' %}pending{% endif %}" data-seat-id="1"></div>
                 <div class="seat {% if seats['2'] == 'booked' %}booked{% elif seats['2'] == 'pending' %}pending{% endif %}" data-seat-id="2"></div>
             </div>
             <div class="row">

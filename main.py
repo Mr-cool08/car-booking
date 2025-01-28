@@ -44,7 +44,7 @@ app.secret_key = SECRET_KEY
 def checkiftaken(seat_id):
     with sqlite3.connect('bookings.db') as conn:
         cursor = conn.cursor()
-        cursor.execute('SELECT seat_id FROM bookings WHERE seat_id = ?', (seat_id,))
+        cursor.execute('SELECT approved FROM bookings WHERE seat_id = ? AND approved = 1', (seat_id,))
         booking = cursor.fetchone()
         if booking:
             return True
@@ -122,6 +122,7 @@ def admin():
             if booking:
                 if action == 'approve':
                     if checkiftaken(booking[1]) == True:
+                        print()
                         return render_template('error.html', error_name="Sätet är redan bokat")
                     cursor.execute('UPDATE bookings SET approved = 1 WHERE id = ?', (booking_id,))
                     conn.commit()
