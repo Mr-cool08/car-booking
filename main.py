@@ -171,7 +171,7 @@ def schedule_restart():
     schedule.every().monday.at("00:00").do(restart_app)
     while True:
         schedule.run_pending()
-        time.sleep(1)
+        time.sleep(10)
 @app.route('/cheat', methods=['GET'])
 def cheat():
     return render_template('cheat.html')
