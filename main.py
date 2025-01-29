@@ -88,13 +88,18 @@ def send_email(subject, recipient, html_content):
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
-    seats = {str(i): "available" for i in range(1, 6)}
-    
+    global conn
+    if conn is None or conn.closed:
+        conn = sqlitecloud.connect(DATABASE_LOGIN)
+
     cursor = conn.cursor()
     cursor.execute('SELECT seat_id, approved FROM bookings')
     bookings = cursor.fetchall()
+
+    seats = {str(i): "available" for i in range(1, 6)}
     for booking in bookings:
         seats[booking[0]] = "booked" if booking[1] else "pending"
+
     return render_template('index.html', seats=seats)
 
 @app.route('/book_seat', methods=['POST'])
