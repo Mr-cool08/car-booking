@@ -121,6 +121,9 @@ def admin():
     if request.method == 'POST':
         booking_id = request.form.get('booking_id')
         action = request.form.get('action')
+        global conn
+        if conn is None or conn.close:
+            conn = sqlitecloud.connect(DATABASE_LOGIN)
         cursor = conn.cursor()
         cursor.execute('SELECT * FROM bookings WHERE id = ?', (booking_id,))
         booking = cursor.fetchone()
