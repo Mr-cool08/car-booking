@@ -89,7 +89,7 @@ def send_email(subject, recipient, html_content):
 @app.route('/', methods=['GET', 'POST'])
 def home():
     global conn
-    if conn is None or conn.closed:
+    if conn is None or conn.close:
         conn = sqlitecloud.connect(DATABASE_LOGIN)
 
     cursor = conn.cursor()
