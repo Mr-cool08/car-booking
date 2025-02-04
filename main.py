@@ -10,6 +10,7 @@ import datetime
 import sys
 from dotenv import load_dotenv
 
+# Initialize APScheduler
 scheduler = APScheduler()
 today = datetime.datetime.today()
 week_num = today.isocalendar()[1]
@@ -23,16 +24,19 @@ MAIL_USERNAME = os.getenv('MAIL_USERNAME')
 MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
 DATABASE_LOGIN = os.getenv('DATABASE_LOGIN')
 
+# Initialize Flask app
 app = Flask(__name__)
 app.secret_key = SECRET_KEY
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
-def weeknumberwrite(): # Write the week number to a file (!Not being used!)
+# Function to write the week number to a file (not being used)
+def weeknumberwrite(): 
     with open('week_number.txt', 'w') as file:
         file.write(f"Week number: {week_num}")
 
-def weeknumbercheck(): # Check if the week number is the same as the stored week number (!Not being used!)
+# Function to check if the week number is the same as the stored week number (not being used)
+def weeknumbercheck(): 
     if os.path.exists('week_number.txt'):
         with open('week_number.txt', 'r') as file:
             stored_week_num = int(file.read().strip().split(": ")[1])
@@ -44,7 +48,8 @@ def weeknumbercheck(): # Check if the week number is the same as the stored week
         weeknumberwrite()
 
 
-def checkiftaken(seat_id): # Check if seat is already taken
+# Function to check if a seat is already taken
+def checkiftaken(seat_id): 
     global conn
     if conn is None or conn.close:
         conn = sqlitecloud.connect(DATABASE_LOGIN)
@@ -54,8 +59,7 @@ def checkiftaken(seat_id): # Check if seat is already taken
     print("Booking: ", booking)
     return booking is not None
 
-# This function initializes the database
-# It is run once when the server starts
+# Function to initialize the database (run once when the server starts)
 def init_db(): 
     
     
@@ -76,7 +80,8 @@ def init_db():
             pass
 
 
-def send_email(subject, recipient, html_content): # This function send an email to the booking recipient
+# Function to send an email to the booking recipient
+def send_email(subject, recipient, html_content): 
     msg = MIMEMultipart()
     msg['From'] = MAIL_USERNAME
     msg['To'] = recipient
@@ -94,7 +99,8 @@ def send_email(subject, recipient, html_content): # This function send an email 
         print(f"Failed to send email: {e}")
 
 
-@app.route('/', methods=['GET', 'POST']) # This is the booking page
+# Route for the booking page
+@app.route('/', methods=['GET', 'POST']) 
 def home():
     global conn
     if conn is None or conn.close:
@@ -111,7 +117,8 @@ def home():
     return render_template('index.html', seats=seats)
 
 
-@app.route('/book_seat', methods=['POST']) # This is the booking page
+# Route to book a seat
+@app.route('/book_seat', methods=['POST']) 
 def book_seat():
     global conn
     if conn is None or conn.close:
@@ -132,7 +139,8 @@ def book_seat():
     return jsonify({"status": "error", "message": "Invalid input"})
 
 
-@app.route('/admin', methods=['GET', 'POST']) # This is the admin page
+# Route for the admin page
+@app.route('/admin', methods=['GET', 'POST']) 
 def admin():
     if request.method == 'POST':
         booking_id = request.form.get('booking_id')
@@ -195,11 +203,11 @@ def admin():
         return render_template('error.html', error_name="Fel metod")
 
 
-# Work in progress
-@app.route('/login', methods=['GET', 'POST'])
+
+# Route for the login page
+@app.route('/login', methods=['GET', 'POST']) 
 def login():
     if request.method == 'POST':
-        
         password = request.form.get('password')
         if password == os.getenv('ADMIN_PASSWORD'):
             session['logged_in'] = True
@@ -216,7 +224,8 @@ def login():
 
 
 
-def clear_database(): # This function clears the database
+# Function to clear the database
+def clear_database(): 
     DATABASE_LOGIN = os.getenv('DATABASE_LOGIN')
     conn = sqlitecloud.connect(DATABASE_LOGIN)
     cursor = conn.cursor()
@@ -235,22 +244,28 @@ def clear_database(): # This function clears the database
     conn.close()
 
 
-@app.route('/cheat', methods=['GET']) # This is the cheat sheet for the admin
+# Route for the cheat sheet for the admin
+@app.route('/cheat', methods=['GET']) 
 def cheat():
     return render_template('cheat.html') 
 
+# Initialize and start the scheduler
 scheduler.init_app(app)
 scheduler.start()
 
+# Scheduled task to clear the database every Sunday at midnight
 @scheduler.task('cron', id='cleardatabase', day_of_week='sun', hour=0, minute=0, misfire_grace_time=120)
 def cleardatabase():
     clear_database()
     
     
 
+# Error handler for 404 errors
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('error.html', error_name="Sidan kunde inte hittas"), 404
+
+# Error handler for 500 errors
 @app.errorhandler(500)
 def internal_server_error(e):
     error_message = str(e)
@@ -272,6 +287,7 @@ def internal_server_error(e):
 
 
 
+# Main entry point of the application
 if __name__ == '__main__':
     global conn
     conn = sqlitecloud.connect(DATABASE_LOGIN)
