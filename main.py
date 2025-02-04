@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify, render_template, session, redirect, url_for
+from flask_session import Session
 import os
 import sqlitecloud
 import smtplib
@@ -24,7 +25,9 @@ DATABASE_LOGIN = os.getenv('DATABASE_LOGIN')
 
 app = Flask(__name__)
 app.secret_key = SECRET_KEY
-
+app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_TYPE"] = "filesystem"
+Session(app)
 def weeknumberwrite(): # Write the week number to a file (!Not being used!)
     with open('week_number.txt', 'w') as file:
         file.write(f"Week number: {week_num}")
@@ -179,23 +182,33 @@ def admin():
                     </html>
                     """
                 )
-    conn = sqlitecloud.connect(DATABASE_LOGIN)
-    cursor = conn.cursor()
-    cursor.execute('SELECT id, seat_id, name, email, approved FROM bookings')
-    bookings = cursor.fetchall()
-    return render_template('admin.html', bookings=bookings)
+    elif request.method == 'GET':
+        if session.get("logged_in"):
+            conn = sqlitecloud.connect(DATABASE_LOGIN)
+            cursor = conn.cursor()
+            cursor.execute('SELECT id, seat_id, name, email, approved FROM bookings')
+            bookings = cursor.fetchall()
+            return render_template('admin.html', bookings=bookings)
+        else:
+            return redirect(url_for('login'))
+    else:
+        return render_template('error.html', error_name="Fel metod")
 
 
-""" Work in progress
+# Work in progress
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
+        if session.get("logged_in"):
+            return redirect(url_for('admin'))
         password = request.form.get('password')
         if password == os.getenv('ADMIN_PASSWORD'):
             session['logged_in'] = True
             return redirect(url_for('admin'))
+        else:
+            return render_template('error.html', error_name="Fel lösenord")
     return render_template('login.html')
-"""
+
 
 
 def clear_database(): # This function clears the database
@@ -258,4 +271,4 @@ if __name__ == '__main__':
     global conn
     conn = sqlitecloud.connect(DATABASE_LOGIN)
     init_db()
-    app.run(debug=False, host="0.0.0.0", port=80)
+    app.run(debug=True, host="0.0.0.0", port=80)

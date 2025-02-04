@@ -4,3 +4,4 @@ Flask-Mail
 Flask-APScheduler
 python-dotenv
 sqlitecloud
+Flask-Session
