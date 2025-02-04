@@ -1,6 +1,6 @@
 flask
 Werkzeug
 Flask-Mail
-schedule
+Flask-APScheduler
 python-dotenv
 sqlitecloud

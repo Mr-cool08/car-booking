@@ -11,7 +11,7 @@
 
     <p class="text-center">Boka säte i Timothys bil snabbt.</p></center>
 
-    <form id="bookingForm", class="container">
+    <form id="bookingForm" class="container">
         <center>
         <input type="text" id="name" name="name" placeholder="Ditt namn" class="input-field" required>
         <input type="email" id="email" name="email" placeholder="Din E-postaddress" class="input-field" required></center>
@@ -47,7 +47,8 @@
         });
     });
 
-    document.getElementById('confirmButton').addEventListener('click', function() {
+    document.getElementById('bookingForm').addEventListener('submit', function(event) {
+        event.preventDefault();  // Prevent default form submission
         const selectedSeats = document.querySelectorAll('.seat.selected');
         if (selectedSeats.length === 0) {
             alert('Var god välj minst ett säte.');
@@ -65,6 +66,7 @@
         })
         .then(response => response.json())
         .then(data => {
+            console.log('Response:', data);  // Debugging print
             if (data.status === 'success') {
                 selectedSeats.forEach(seat => {
                     seat.classList.add('pending');
@@ -74,6 +76,9 @@
             } else {
                 alert(data.message);
             }
+        })
+        .catch(error => {
+            console.error('Error:', error);  // Debugging print
         });
     });
     </script>

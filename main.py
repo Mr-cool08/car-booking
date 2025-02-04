@@ -4,23 +4,32 @@ import sqlitecloud
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from flask_apscheduler import APScheduler
 import datetime
-import schedule
-import time
-import threading
+import sys
 from dotenv import load_dotenv
 
-# Load environment variables from .env file
-load_dotenv()
-
+scheduler = APScheduler()
 today = datetime.datetime.today()
 week_num = today.isocalendar()[1]
+# Load environment variables from .env file
+load_dotenv()
+SECRET_KEY = os.getenv('SECRET_KEY')
+MAIL_SERVER = os.getenv('MAIL_SERVER')
+MAIL_PORT = int(os.getenv('MAIL_PORT'))
+MAIL_USE_TLS = os.getenv('MAIL_USE_TLS') == 'True'
+MAIL_USERNAME = os.getenv('MAIL_USERNAME')
+MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
+DATABASE_LOGIN = os.getenv('DATABASE_LOGIN')
 
-def weeknumberwrite():
+app = Flask(__name__)
+app.secret_key = SECRET_KEY
+
+def weeknumberwrite(): # Write the week number to a file (!Not being used!)
     with open('week_number.txt', 'w') as file:
         file.write(f"Week number: {week_num}")
 
-def weeknumbercheck():
+def weeknumbercheck(): # Check if the week number is the same as the stored week number (!Not being used!)
     if os.path.exists('week_number.txt'):
         with open('week_number.txt', 'r') as file:
             stored_week_num = int(file.read().strip().split(": ")[1])
@@ -31,28 +40,21 @@ def weeknumbercheck():
     else:
         weeknumberwrite()
 
-app = Flask(__name__)
 
-SECRET_KEY = os.getenv('SECRET_KEY')
-MAIL_SERVER = os.getenv('MAIL_SERVER')
-MAIL_PORT = int(os.getenv('MAIL_PORT'))
-MAIL_USE_TLS = os.getenv('MAIL_USE_TLS') == 'True'
-MAIL_USERNAME = os.getenv('MAIL_USERNAME')
-MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
-DATABASE_LOGIN = os.getenv('DATABASE_LOGIN')
-
-app.secret_key = SECRET_KEY
-
-def checkiftaken(seat_id):
+def checkiftaken(seat_id): # Check if seat is already taken
     global conn
     if conn is None or conn.close:
         conn = sqlitecloud.connect(DATABASE_LOGIN)
     cursor = conn.cursor()
     cursor.execute('SELECT approved FROM bookings WHERE seat_id = ? AND approved = 1', (seat_id,))
     booking = cursor.fetchone()
+    print("Booking: ", booking)
     return booking is not None
 
-def init_db():
+# This function initializes the database
+# It is run once when the server starts
+def init_db(): 
+    
     
         cursor = conn.cursor()
         cursor.execute('''
@@ -70,7 +72,8 @@ def init_db():
         else: 
             pass
 
-def send_email(subject, recipient, html_content):
+
+def send_email(subject, recipient, html_content): # This function send an email to the booking recipient
     msg = MIMEMultipart()
     msg['From'] = MAIL_USERNAME
     msg['To'] = recipient
@@ -87,7 +90,8 @@ def send_email(subject, recipient, html_content):
     except Exception as e:
         print(f"Failed to send email: {e}")
 
-@app.route('/', methods=['GET', 'POST'])
+
+@app.route('/', methods=['GET', 'POST']) # This is the booking page
 def home():
     global conn
     if conn is None or conn.close:
@@ -103,21 +107,29 @@ def home():
 
     return render_template('index.html', seats=seats)
 
-@app.route('/book_seat', methods=['POST'])
+
+@app.route('/book_seat', methods=['POST']) # This is the booking page
 def book_seat():
+    global conn
+    if conn is None or conn.close:
+        conn = sqlitecloud.connect(DATABASE_LOGIN)
     seat_ids = request.form.get('seat_ids').split(',')
     name = request.form.get('name')
     email = request.form.get('email')
+    print(f"Received seat_ids: {seat_ids}, name: {name}, email: {email}")  # Debugging print
     if seat_ids and name and email:
-        
         cursor = conn.cursor()
         for seat_id in seat_ids:
+            print(f"Inserting booking for seat_id: {seat_id}, name: {name}, email: {email}")  # Debugging print
             cursor.execute('INSERT INTO bookings (seat_id, name, email, approved) VALUES (?, ?, ?, 0)', (seat_id, name, email))
         conn.commit()
+        print("Booking successful")  # Debugging print
         return jsonify({"status": "success", "seat_ids": seat_ids})
+    print("Invalid input")  # Debugging print
     return jsonify({"status": "error", "message": "Invalid input"})
 
-@app.route('/admin', methods=['GET', 'POST'])
+
+@app.route('/admin', methods=['GET', 'POST']) # This is the admin page
 def admin():
     if request.method == 'POST':
         booking_id = request.form.get('booking_id')
@@ -173,25 +185,77 @@ def admin():
     bookings = cursor.fetchall()
     return render_template('admin.html', bookings=bookings)
 
-def restart_app():
-    os.execv(__file__, ['python'] + sys.argv)
+
+""" Work in progress
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        password = request.form.get('password')
+        if password == os.getenv('ADMIN_PASSWORD'):
+            session['logged_in'] = True
+            return redirect(url_for('admin'))
+    return render_template('login.html')
+"""
 
 
-@app.route('/cheat', methods=['GET'])
+def clear_database(): # This function clears the database
+    DATABASE_LOGIN = os.getenv('DATABASE_LOGIN')
+    conn = sqlitecloud.connect(DATABASE_LOGIN)
+    cursor = conn.cursor()
+
+    # Retrieve all user-defined tables (skip system tables)
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")
+    tables = cursor.fetchall()
+
+    # Delete all rows from each table except those with seat_id = 1
+    for table in tables:
+        table_name = table[0]
+        cursor.execute(f"DELETE FROM {table_name} WHERE seat_id != 1")
+
+    conn.commit()
+    print("All data cleared from the tables except rows with seat_id = 1, but the table structures remain intact.")
+    conn.close()
+
+
+@app.route('/cheat', methods=['GET']) # This is the cheat sheet for the admin
 def cheat():
-    return render_template('cheat.html')
+    return render_template('cheat.html') 
+
+scheduler.init_app(app)
+scheduler.start()
+
+@scheduler.task('cron', id='cleardatabase', day_of_week='sun', hour=0, minute=0, misfire_grace_time=120)
+def cleardatabase():
+    clear_database()
+    
+    
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('error.html', error_name="Sidan kunde inte hittas"), 404
+@app.errorhandler(500)
+def internal_server_error(e):
+    error_message = str(e)
+    send_email(
+        'Internal Server Error',
+        'Liam@suorsa.se',
+        f"""
+        <html>
+        <body>
+            <p>Hej Admin!</p>
+            <p>Det har uppstått ett internt serverfel.</p>
+            <p>Felmeddelande: {error_message}</p>
+        </body>
+        </html>
+        """
+    )
+    return render_template('error.html', error_name="Något gick fel"), 500
+
+
+
+
 if __name__ == '__main__':
     global conn
     conn = sqlitecloud.connect(DATABASE_LOGIN)
     init_db()
-    if weeknumbercheck() == False:
-    
-        cursor = conn.cursor()
-        cursor.execute('DELETE FROM bookings ')
-        conn.commit()
-        weeknumberwrite()
-    else:
-        pass
-    
-   
     app.run(debug=False, host="0.0.0.0", port=80)
