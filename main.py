@@ -199,15 +199,20 @@ def admin():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        if session.get("logged_in"):
-            return redirect(url_for('admin'))
+        
         password = request.form.get('password')
         if password == os.getenv('ADMIN_PASSWORD'):
             session['logged_in'] = True
             return redirect(url_for('admin'))
         else:
             return render_template('error.html', error_name="Fel lösenord")
-    return render_template('login.html')
+    elif request.method == 'GET':
+        if session.get("logged_in"):
+            return redirect(url_for('admin'))
+        else:
+            return render_template('login.html')
+    else:
+        return render_template('error.html', error_name="Fel metod")    
 
 
 
