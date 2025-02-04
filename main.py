@@ -175,11 +175,7 @@ def admin():
 def restart_app():
     os.execv(__file__, ['python'] + sys.argv)
 
-def schedule_restart():
-    schedule.every().monday.at("00:00").do(restart_app)
-    while True:
-        schedule.run_pending()
-        time.sleep(10)
+
 @app.route('/cheat', methods=['GET'])
 def cheat():
     return render_template('cheat.html')
@@ -195,5 +191,5 @@ if __name__ == '__main__':
     else:
         pass
     init_db()
-    threading.Thread(target=schedule_restart).start()
+   
     app.run(debug=False, host="0.0.0.0", port=80)
