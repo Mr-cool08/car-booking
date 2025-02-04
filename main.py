@@ -42,15 +42,16 @@ MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
 DATABASE_LOGIN = os.getenv('DATABASE_LOGIN')
 
 app.secret_key = SECRET_KEY
-def checkiftaken(seat_id):
 
-        cursor = conn.cursor()
-        cursor.execute('SELECT approved FROM bookings WHERE seat_id = ? AND approved = 1', (seat_id,))
-        booking = cursor.fetchone()
-        if booking:
-            return True
-        else:
-            return False
+def checkiftaken(seat_id):
+    global conn
+    if conn is None or conn.close:
+        conn = sqlitecloud.connect(DATABASE_LOGIN)
+    cursor = conn.cursor()
+    cursor.execute('SELECT approved FROM bookings WHERE seat_id = ? AND approved = 1', (seat_id,))
+    booking = cursor.fetchone()
+    return booking is not None
+
 def init_db():
     
         cursor = conn.cursor()
@@ -182,6 +183,7 @@ def cheat():
 if __name__ == '__main__':
     global conn
     conn = sqlitecloud.connect(DATABASE_LOGIN)
+    init_db()
     if weeknumbercheck() == False:
     
         cursor = conn.cursor()
@@ -190,6 +192,6 @@ if __name__ == '__main__':
         weeknumberwrite()
     else:
         pass
-    init_db()
+    
    
     app.run(debug=False, host="0.0.0.0", port=80)
