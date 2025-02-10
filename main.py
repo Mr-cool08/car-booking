@@ -172,6 +172,7 @@ def admin():
                     </html>
                     """
                 )
+                return render_template('error.html', error_name="Bokningen har godkänts")
             elif action == 'reject':
                 cursor.execute('DELETE FROM bookings WHERE id = ?', (booking_id,))
                 conn.commit()
@@ -292,4 +293,4 @@ if __name__ == '__main__':
     global conn
     conn = sqlitecloud.connect(DATABASE_LOGIN)
     init_db()
-    app.run(debug=True, host="0.0.0.0", port=80)
+    app.run(debug=False, host="0.0.0.0", port=80)
