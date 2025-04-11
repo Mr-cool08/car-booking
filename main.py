@@ -191,6 +191,7 @@ def admin():
                     </html>
                     """
                 )
+                return render_template('error.html', error_name="Bokningen har nekats")
     elif request.method == 'GET':
         if session.get("logged_in"):
             conn = sqlitecloud.connect(DATABASE_LOGIN)
