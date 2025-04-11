@@ -9,6 +9,7 @@ from flask_apscheduler import APScheduler
 import datetime
 import sys
 from dotenv import load_dotenv
+import traceback
 
 # Initialize APScheduler
 scheduler = APScheduler()
@@ -271,6 +272,8 @@ def page_not_found(e):
 @app.errorhandler(500)
 def internal_server_error(e):
     error_message = str(e)
+    full_traceback = traceback.format_exc()  # Full stack trace
+
     send_email(
         'Internal Server Error',
         'Liam@suorsa.se',
@@ -279,7 +282,8 @@ def internal_server_error(e):
         <body>
             <p>Hej Admin!</p>
             <p>Det har uppstått ett internt serverfel.</p>
-            <p>Felmeddelande: {error_message}</p>
+            <p><strong>Felmeddelande:</strong><br>{error_message}</p>
+            <p><strong>Stacktrace:</strong><br><pre>{full_traceback}</pre></p>
         </body>
         </html>
         """
@@ -294,4 +298,4 @@ if __name__ == '__main__':
     global conn
     conn = sqlitecloud.connect(DATABASE_LOGIN)
     init_db()
-    app.run(debug=False, host="0.0.0.0", port=80)
+    app.run(debug=True, host="0.0.0.0", port=80)
